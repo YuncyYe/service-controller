@@ -1,0 +1,76 @@
+# Copyright (c) 2025 - 2026 The BFE Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+#---step 1
+FROM golang:1.21-alpine AS build
+RUN apk update && apk add git tzdata
+
+ARG COMMIT_ID
+ARG VERSION
+ARG FORMATTED_TS
+
+ENV SC_COMMIT_ID=${COMMIT_ID}
+ENV SC_VERSION=${VERSION}
+ENV SC_FORMATTED_TS=${FORMATTED_TS}
+
+WORKDIR /service-controller
+
+RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime 
+RUN echo "Asia/Shanghai" > /etc/timezone
+
+# Download go modules
+COPY go.mod .
+COPY go.sum .
+RUN GO111MODULE=on GOPRIVATE=*.yf-networks.cn GOPROXY=https://goproxy.cn,direct go mod download
+
+COPY . .
+RUN chmod +x build/build.sh
+RUN sh build/build.sh
+
+
+#---step 2
+#FROM 172.18.1.244:5000/alpine:3.19 AS run
+FROM alpine:3.19 AS run
+
+ARG COMMIT_ID
+ARG VERSION
+ARG FORMATTED_TS
+
+ENV SC_COMMIT_ID=${COMMIT_ID}
+ENV SC_VERSION=${VERSION}
+ENV SC_FORMATTED_TS=${FORMATTED_TS}
+
+LABEL org.opencontainers.image.revision=${COMMIT_ID} \
+      org.opencontainers.image.version=${VERSION} \
+      org.opencontainers.image.created=${FORMATTED_TS} \
+      org.opencontainers.image.revcreated=${COMMIT_ID}-${FORMATTED_TS} \
+      security.recommendations="non-root user, read-only rootfs, no-new-privileges, no privileged mode"
+
+#RUN yum install -y shadow
+#RUN groupadd -r yfgroup -g 1000 && useradd -r -g yfgroup -u 1000 yfuser
+RUN echo "yfgroup:x:1000:" >> /etc/group
+RUN echo "work:x:1000:1000::/home/work:/bin/sh" >> /etc/passwd
+RUN mkdir -p /home/work
+
+WORKDIR /
+COPY --from=build /service-controller/output/* /
+
+EXPOSE 9080 9091
+
+USER work:yfgroup
+
+ENTRYPOINT ["/service-controller"]
+
+
