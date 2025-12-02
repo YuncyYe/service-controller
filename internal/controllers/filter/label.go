@@ -1,4 +1,4 @@
-// Copyright (c) 2025 - 2026 The BFE Authors.
+// Copyright (c) 2025 The BFE Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,25 +15,25 @@
 package filter
 
 import (
-	"github.com/bfenetworks/k8s/service-controller/internal/util"
+	"github.com/bfenetworks/service-controller/internal/util"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 const (
-	YingfeiAnnotationPrefix = "k8s.yingfei.com/"
+	BfenetworksAnnotationPrefix = "k8s.bfenetworks.com/"
 )
 
-func isYingfeiTargetService(service client.Object) bool {
+func isBfenetworksTargetService(service client.Object) bool {
 	sname := service.GetName()
 	labels := service.GetLabels()
 	if labels != nil {
-		_, ipok := labels["ilb-product"]
+		_, ipok := labels["bfe-product"]
 		if ipok {
 			return true
 		}
 	}
-	util.HdlLogger.Info("ilb-product label does not present for k8s service", "sname", sname)
+	util.HdlLogger.Info("bfe-product label does not present for k8s service", "sname", sname)
 
 	return false
 }
@@ -45,7 +45,7 @@ func LabelFilter() predicate.Funcs {
 			return false
 		}
 
-		return isYingfeiTargetService(obj)
+		return isBfenetworksTargetService(obj)
 	})
 
 	return funcs

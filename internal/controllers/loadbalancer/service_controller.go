@@ -1,4 +1,4 @@
-// Copyright (c) 2025 - 2026 The BFE Authors.
+// Copyright (c) 2025 The BFE Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,16 +30,16 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
-	openapi "github.com/bfenetworks/k8s/service-controller/internal/alb"
-	"github.com/bfenetworks/k8s/service-controller/internal/controllers/filter"
-	"github.com/bfenetworks/k8s/service-controller/internal/option"
-	util "github.com/bfenetworks/k8s/service-controller/internal/util"
+	openapi "github.com/bfenetworks/service-controller/internal/alb"
+	"github.com/bfenetworks/service-controller/internal/controllers/filter"
+	"github.com/bfenetworks/service-controller/internal/option"
+	util "github.com/bfenetworks/service-controller/internal/util"
 )
 
 const (
-	FinalizerName                  = "k8s.yingfei.com/delete-protection"
-	YingfeiAnnotationPrefix        = filter.YingfeiAnnotationPrefix
-	ProductPoolResultAnnotationKey = YingfeiAnnotationPrefix + "productpool-result"
+	FinalizerName                  = "k8s.bfenetworks.com/delete-protection"
+	BfenetworksAnnotationPrefix    = filter.BfenetworksAnnotationPrefix
+	ProductPoolResultAnnotationKey = BfenetworksAnnotationPrefix + "productpool-result"
 
 	OPTypeDelete = "delete"
 	OPTypeUpdate = "update"
@@ -141,7 +141,7 @@ func (r *ServiceReconciler) ensurePool(ctx context.Context, namespace string, na
 
 	labels := service.GetObjectMeta().GetLabels()
 
-	if product, ok := labels["ilb-product"]; ok {
+	if product, ok := labels["bfe-product"]; ok {
 		err = r.ensureProductPool(ctx, service, ep, product)
 	}
 
@@ -314,8 +314,8 @@ func (r *ServiceReconciler) handleResultConfigmap(ctx context.Context, ns string
 		}
 	} else {
 		dst.ObjectMeta.Labels = map[string]string{}
-		dst.ObjectMeta.Labels["ilb-cm-result"] = "yes"
-		dst.ObjectMeta.Labels["ilb-result-type"] = "service"
+		dst.ObjectMeta.Labels["bfe-cm-result"] = "yes"
+		dst.ObjectMeta.Labels["bfe-result-type"] = "service"
 		dst.ObjectMeta.Labels["extra-msg"] = op
 
 		dst.Data = map[string]string{}

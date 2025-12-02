@@ -1,4 +1,4 @@
-# Copyright (c) 2025 - 2026 The BFE Authors.
+# Copyright (c) 2025 The BFE Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,7 +33,8 @@ RUN echo "Asia/Shanghai" > /etc/timezone
 # Download go modules
 COPY go.mod .
 COPY go.sum .
-RUN GO111MODULE=on GOPRIVATE=*.yf-networks.cn GOPROXY=https://goproxy.cn,direct go mod download
+#RUN GO111MODULE=on GOPROXY=https://goproxy.cn,direct go mod download
+RUN GO111MODULE=on go mod download
 
 COPY . .
 RUN chmod +x build/build.sh
@@ -59,8 +60,8 @@ LABEL org.opencontainers.image.revision=${COMMIT_ID} \
       security.recommendations="non-root user, read-only rootfs, no-new-privileges, no privileged mode"
 
 #RUN yum install -y shadow
-#RUN groupadd -r yfgroup -g 1000 && useradd -r -g yfgroup -u 1000 yfuser
-RUN echo "yfgroup:x:1000:" >> /etc/group
+#RUN groupadd -r bfegroup -g 1000 && useradd -r -g bfegroup -u 1000 bfeuser
+RUN echo "bfegroup:x:1000:" >> /etc/group
 RUN echo "work:x:1000:1000::/home/work:/bin/sh" >> /etc/passwd
 RUN mkdir -p /home/work
 
@@ -69,7 +70,7 @@ COPY --from=build /service-controller/output/* /
 
 EXPOSE 9080 9091
 
-USER work:yfgroup
+USER work:bfegroup
 
 ENTRYPOINT ["/service-controller"]
 

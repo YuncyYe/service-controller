@@ -1,4 +1,4 @@
-// Copyright (c) 2021 The BFE Authors.
+// Copyright (c) 2025 The BFE Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package main
 import (
 	"flag"
 
-	"github.com/bfenetworks/k8s/service-controller/internal/option"
+	"github.com/bfenetworks/service-controller/internal/option"
 )
 
 var (
@@ -34,13 +34,13 @@ func initFlags() {
 	flag.BoolVar(&showVersion, "version", false, "Show version of bfe-ingress-controller.")
 	flag.BoolVar(&showVersion, "v", false, "Show version of bfe-ingress-controller.")
 
-	flag.StringVar(&opts.ExternalLB.ApiServerAddr, "ilb-api-addr", opts.ExternalLB.ApiServerAddr, "Address of ALB api server")
-	flag.StringVar(&opts.ExternalLB.Token, "ilb-api-token", opts.ExternalLB.Token, "access token of ALB api server")
+	flag.StringVar(&opts.ExternalLB.ApiServerAddr, "bfe-api-addr", opts.ExternalLB.ApiServerAddr, "Address of ALB api server")
+	flag.StringVar(&opts.ExternalLB.Token, "bfe-api-token", opts.ExternalLB.Token, "access token of ALB api server")
 
 	flag.StringVar(&opts.ClusterName, "k8s-cluster-name", opts.ClusterName, "k8s cluster name")
 
 	flag.IntVar(&opts.RetryIntervalUnitForErrS, "retry-interval-unit-sec", -1, "retry interval second(<=0, means use default retry interval)")
-	flag.BoolVar(&opts.ForceRmFinalizer, "force-rm-finalizer", false, "will remove yf finalizer even deleting failed")
+	flag.BoolVar(&opts.ForceRmFinalizer, "force-rm-finalizer", false, "will remove finalizer even deleting failed")
 
 	flag.StringVar(&opts.Namespaces, "namespace", opts.Namespaces, "Namespaces to watch, delimited by ',', '*' for all.")
 	flag.StringVar(&opts.Namespaces, "n", opts.Namespaces, "Namespaces to watch, delimited by ',', '*' for all.")

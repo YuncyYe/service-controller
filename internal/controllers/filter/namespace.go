@@ -1,4 +1,4 @@
-// Copyright (c) 2025 - 2026 The BFE Authors.
+// Copyright (c) 2025 The BFE Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
-	"github.com/bfenetworks/k8s/service-controller/internal/option"
+	"github.com/bfenetworks/service-controller/internal/option"
 )
 
 func NamespaceFilter() predicate.Funcs {
