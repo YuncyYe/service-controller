@@ -1,4 +1,4 @@
-# Copyright (c) 2025 - 2026 The BFE Authors.
+# Copyright (c) 2025 The BFE Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,63 +16,62 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: yf-service-controller
+  name: bfe-service-controller
   namespace: default
   labels:
-    app.kubernetes.io/name: yf-service-controller
-    app.kubernetes.io/instance: yf-service-controller
+    app.kubernetes.io/name: bfe-service-controller
+    app.kubernetes.io/instance: bfe-service-controller
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   #namespace as postfix
-  name: yf-service-controller-default
+  name: bfe-service-controller-default
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: cluster-admin
 subjects:
 - kind: ServiceAccount
-  name: yf-service-controller
+  name: bfe-service-controller
   namespace: default
 
 ---
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: yf-service-controller
+  name: bfe-service-controller
   namespace: default
   labels:
-    app.kubernetes.io/name: yf-service-controller
-    app.kubernetes.io/instance: yf-service-controller
+    app.kubernetes.io/name: bfe-service-controller
+    app.kubernetes.io/instance: bfe-service-controller
 spec:
   replicas: 1
   strategy:
     type: Recreate 
   selector:
     matchLabels:
-      app.kubernetes.io/name: yf-service-controller
-      app.kubernetes.io/instance: yf-service-controller
+      app.kubernetes.io/name: bfe-service-controller
+      app.kubernetes.io/instance: bfe-service-controller
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: yf-service-controller
-        app.kubernetes.io/instance: yf-service-controller
+        app.kubernetes.io/name: bfe-service-controller
+        app.kubernetes.io/instance: bfe-service-controller
     spec:
-      serviceAccountName: yf-service-controller
+      serviceAccountName: bfe-service-controller
       containers:
-        - name: yf-service-controller
+        - name: bfe-service-controller
           imagePullPolicy: Always
           #image: 172.18.1.244:5000/service-controller-open:latest
-          image: ghcr.io/yuncyye/service-controller:latest
+          image: ghcr.io/bfenetworks/service-controller:x86_64-v1.0.0
           command: [ "/service-controller" ]
           args:
-            - '-ilb-api-addr=http://172.18.1.244:8183'
-            - '-ilb-api-token=Token xCFZgmV02dzD3lWTlRvN'
+            - '-bfe-api-addr=http://172.18.1.244:8183'
+            - '-bfe-api-token=Token xCFZgmV02dzD3lWTlRvN'
             - '-k8s-cluster-name=szyf'
             - '-namespace=open-bfe-demo'
-            - '-force-rm-finalizer=false'
           ports:
             - containerPort: 9081
           livenessProbe:
@@ -94,8 +93,8 @@ spec:
             successThreshold: 1
             failureThreshold: 3
           securityContext:
-            runAsUser: 1000       # yfuser defined in Dockerfile
-            runAsGroup: 1000      # yfgroup defined in Dockerfile
+            runAsUser: 1000       # bfeuser defined in Dockerfile
+            runAsGroup: 1000      # bfegroup defined in Dockerfile
             runAsNonRoot: true            
             privileged: false
             allowPrivilegeEscalation: false

@@ -1,4 +1,4 @@
-# Copyright (c) 2025 - 2026 The BFE Authors.
+# Copyright (c) 2025 The BFE Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ metadata:
   name: whoami
   namespace: open-bfe-demo
   labels:
-    ilb-product: demo
+    bfe-product: demo
 spec:
   # type: ClusterIP
   # clusterIP: None

@@ -1,70 +1,71 @@
 # service-controller
 
-`service-controller` 是一个 Kubernetes 控制器，用于实现基于 Kubernetes Service 资源的 BFE (Baidu Front End) 7层服务自动发现与配置。该控制器持续监控集群中的 Service 资源变化，自动将符合条件的服务注册到 BFE 配置中，实现服务流量的无缝接入与管理。
+`service-controller` is a Kubernetes controller designed to enable automatic discovery and configuration of BFE (Beyond Front End) Layer 7 services based on Kubernetes Service resources. The controller continuously monitors changes to Service resources in the cluster and automatically registers eligible services into BFE configurations, enabling seamless traffic integration and management.
 
-## 特性
+## Features
 
-- **多架构支持**：同时支持 x86_64 和 ARM64 架构
-- **轻量级基础镜像**：基于 Alpine 构建，体积小，安全性高
-- **精细的服务过滤**：支持 namespace 过滤需要处理的 Kubernetes 服务
-- **多产品线支持**：支持不同业务线的 BFE 集群配置隔离
-- **多端口支持**：支持单个 Service 定义多个端口映射到 多个BFE实例池
-- **完善的监控**：
-  - Readiness 探针：确保控制器准备就绪后才接收流量
-  - Liveness 探针：自动检测并恢复异常状态
-- **操作审计**：
-  - 操作结果记录为 ConfigMap，便于审计和回溯
-  - 操作状态记录为 Kubernetes Event，便于集成现有监控系统
-- **其它**：
-  - 支持自定义重试间隔，适应不同的网络环境和负载情况
+- **Multi-architecture support**: Compatible with both x86_64 and ARM64 architectures.
+- **Lightweight base image**: Built on Alpine for minimal size and enhanced security.
+- **Granular service filtering**: Supports namespace-based filtering of Kubernetes Services to process.
+- **Multi-product-line support**: Enables isolated BFE cluster configurations for different business lines.
+- **Multi-port support**: Allows a single Service defined multiple ports map to multiple BFE instance pools.
+- **Comprehensive monitoring**:
+  - **Readiness probe**: Ensures the controller only receives traffic after it is fully ready.
+  - **Liveness probe**: Automatically detects and recovers from abnormal states.
+- **Operation auditing**:
+  - Operation results are recorded as ConfigMaps for easy auditing and traceability.
+  - Operation statuses are logged as Kubernetes Events for seamless integration with existing monitoring systems.
+- **Other**:
+  - Customizable retry intervals to adapt to varying network conditions and workloads.
 
-## 快速开始
+## Quick Start
 
-### 前提条件
+### Prerequisites
 
-- Kubernetes 集群 (v1.18+)
-- kubectl 配置正确
-- [BFE API Server](https://github.com/bfenetworks/api-server)已部署并可访问
+- Kubernetes cluster (v1.18+)
+- Properly configured `kubectl`
+- [BFE API Server](https://github.com/bfenetworks/api-server) deployed and accessible
 
-### 部署控制器
+### Deploy the Controller
 
 ```bash
-# 克隆仓库
+# Clone the repository
 git clone https://github.com/bfenetworks/service-controller.git
 cd service-controller
 
-# 应用部署清单
+# Apply the deployment manifest
 kubectl apply -f ./examples/service-controller-endpoints.yaml
 ```
 
-### 验证部署
+### Verify Deployment
 
 ```bash
-kubectl get deployment yf-service-controller
-kubectl get pods 
-
+kubectl get deployment bfe-service-controller
+kubectl get pods
 ```
 
-## ⚙️ 配置说明
+## Configuration Guide
 
-### 控制器配置
-请参考 ./examples/service-controller-endpoints.yaml
+### Controller Configuration  
+Refer to `./examples/service-controller-endpoints.yaml`.
 
-注意点：
-- 可以根据实际场景，修改image的源
-- 请根据api server的地址，修改ilb-api-addr
-- 请根据api server的token配置，修改ilb-api-token
-  
-### Service 注解
-通过在 Service 上添加特定注解，控制器会自动将其注册到 BFE
+Notes:
+- Modify the container image source according to your environment.
+- Update `bfe-api-addr` to match your API server address.
+- Set `bfe-api-token` based on your API server token configuration.
+  - Get token by `System View / User Manage / Token` from API servr.
 
-注意点：
-- labels中增加ilb-product指明对应的k8s product
-- ports中的name必须指定
+### Service Label  
+The controller automatically registers Services annotated with specific labels into BFE.
 
-请参考 ./examples/whoami_alb.yaml
+Notes:
+- Add the label `bfe-product` to specify the corresponding BFE product line.
+- The `name` field in each port definition must be explicitly set.
 
-下面是一个demo
+See `./examples/whoami_alb.yaml` for reference.
+
+Example:
+
 ```yaml
 apiVersion: v1
 kind: Service
@@ -72,7 +73,7 @@ metadata:
   name: whoami
   namespace: open-bfe-demo
   labels:
-    ilb-product: demo
+    bfe-product: demo
 spec:
   ports:
     - name: http
@@ -82,79 +83,87 @@ spec:
     app.kubernetes.io/name: whoami
 ```
 
-## 监控与运维
+## Monitoring & Operations
 
-### 健康检查
+### Health Checks
 
-控制器提供标准的 Kubernetes 健康检查端点：
+The controller exposes standard Kubernetes health check endpoints:
 
-- **Readiness 检查**：`GET /ready` - 检查控制器是否准备好处理请求
-- **Liveness 检查**：`GET /healthz` - 检查控制器是否健康运行
+- **Readiness Check**: `GET /ready` – verifies if the controller is ready to handle requests.
+- **Liveness Check**: `GET /healthz` – checks whether the controller is running healthily.
 
-### 操作审计
-控制器将关键操作记录在两个地方：
-1. **Result ConfigMap**：包含最新一次成功应用的 BFE 配置
+### Operation Auditing
+
+Key operations are recorded in two locations:
+
+1. **Result ConfigMap**: Contains the most recently applied successful BFE configuration.
    ```bash
-   kubectl get configmap whoami.result -o yaml
+   kubectl get configmap whoami.result -n open-bfe-demo -o yaml
    ```
 
-2. **Kubernetes Events**：记录重要状态变化
+2. **Kubernetes Events**: Logs significant status changes.
 
+## Building the Project
 
-## 构建项目
-
-### 构建要求
+### Build Requirements
 
 - Go 1.21+
 - Docker
 
-### 构建命令
+### Build Commands
+
 ```bash
-# 构建二进制
+# Build binary
 sh build/build.sh
 
-# 构建 Docker 镜像 (当前架构)
+# Build Docker image (for current architecture)
 sh docker-build.sh release
 
 ```
-
-## 具体使用例子
-### 前置条件
-#### 已经配置好api server，相关信息如下
-- 服务地址: http://172.18.1.244:8183
-- Token为: Token xCFZgmV02dzD3lWTlRvN'
-
-### 已经确k8s相关配置
-- 监听的k8s namespace: open-bfe-demo
-- k8s的集群名为: szyf
-
-### 其它配置
-- 已经在api server上创建好产品线  demo
-
-### 部署service controller
-
+Note:
+- It may need to set GOPROXY to build. eg:
 ```
-#部署service controller
-$kubectl apply -f examples/service-controller-endpoints.yaml
+GO111MODULE=on GOPROXY=https://goproxy.cn,direct go mod download
+```
 
-#查看部署状态
-$kubectl get pods
-NAME                                     READY   STATUS                   RESTARTS       AGE
-yf-service-controller-64c6bf9f8d-bgkch   1/1     Running                  0              8m41s
+## Usage Example
 
-#查看日志
-$kubectl logs yf-service-controller-64c6bf9f8d-bgkch
+### Prerequisites
+
+#### Setup examples/service-controller-endpoints.yaml
+- API Server URL: `http://172.18.1.244:8183`
+- Token: `Token xCFZgmV02dzD3lWTlRvN'`
+- Monitored namespace: `open-bfe-demo`
+- Kubernetes cluster name: `szyf`
+- image has been set properly. Please refer to [service-controller image](https://github.com/bfenetworks/service-controller/pkgs/container/service-controller)
+
+#### Setup fot examples/whoami_alb.yaml
+- Product line `demo` has already been created in the API Server.
+
+### Deploy the Service Controller
+
+```bash
+# Deploy service controller
+$ kubectl apply -f examples/service-controller-endpoints.yaml
+
+# Check deployment status
+$ kubectl get pods
+NAME                                     READY   STATUS    RESTARTS   AGE
+bfe-service-controller-64c6bf9f8d-bgkch   1/1     Running   0          8m41s
+
+# View logs
+$ kubectl logs bfe-service-controller-64c6bf9f8d-bgkch
 ...
 ```
 
-### 部署7层服务
+### Deploy a Layer 7 Service
 
-```
-#部署7层服务
+```bash
+# Deploy Layer 7 service
 $ kubectl apply -f examples/whoami_alb.yaml
 
-#查看部署结果(在api server的website中能看到对应的实例池)
-$kubectl get configmap whoami.result -n open-bfe-demo -o yaml
+# Verify deployment result (the corresponding instance pool should appear in the API Server web UI)
+$ kubectl get configmap whoami.result -n open-bfe-demo -o yaml
 apiVersion: v1
 data:
   result: Succ
@@ -164,23 +173,22 @@ metadata:
   creationTimestamp: "2025-12-01T08:38:23Z"
   labels:
     extra-msg: update
-    ilb-cm-result: "yes"
-    ilb-result-type: service
+    bfe-cm-result: "yes"
+    bfe-result-type: service
   name: whoami.result
   namespace: open-bfe-demo
   resourceVersion: "65652526"
   uid: 8b09c258-c87b-4e17-afc3-ed5f57a4dde9
-
-
 ```
 
-### 删除7层服务
-```
-#删除7层服务
+### Delete the Layer 7 Service
+
+```bash
+# Delete Layer 7 service
 $ kubectl delete -f examples/whoami_alb.yaml
 
-#成功删除后，对应的result configmap也删除
-$kubectl get configmap whoami.result -n open-bfe-demo -o yaml
+# After successful deletion, the corresponding result ConfigMap is also removed
+$ kubectl get configmap whoami.result -n open-bfe-demo -o yaml
 Error from server (NotFound): configmaps "whoami.result" not found
-
 ```
+

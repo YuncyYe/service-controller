@@ -1,4 +1,4 @@
-// Copyright (c) 2021 The BFE Authors.
+// Copyright (c) 2025 The BFE Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/bfenetworks/k8s/service-controller/internal/controllers"
-	"github.com/bfenetworks/k8s/service-controller/internal/option"
+	"github.com/bfenetworks/service-controller/internal/controllers"
+	"github.com/bfenetworks/service-controller/internal/option"
 )
 
 var (

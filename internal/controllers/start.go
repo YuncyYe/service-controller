@@ -1,4 +1,4 @@
-// Copyright (c) 2025 - 2026 The BFE Authors.
+// Copyright (c) 2025 The BFE Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
-	"github.com/bfenetworks/k8s/service-controller/internal/controllers/loadbalancer"
-	"github.com/bfenetworks/k8s/service-controller/internal/controllers/readiness"
-	"github.com/bfenetworks/k8s/service-controller/internal/option"
+	"github.com/bfenetworks/service-controller/internal/controllers/loadbalancer"
+	"github.com/bfenetworks/service-controller/internal/controllers/readiness"
+	"github.com/bfenetworks/service-controller/internal/option"
 )
 
 var (
@@ -46,10 +46,8 @@ func Start(scheme *runtime.Scheme) error {
 		Scheme:                 scheme,
 		Metrics:                metricsserver.Options{BindAddress: option.Opts.MetricsAddr},
 		HealthProbeBindAddress: option.Opts.HealthProbeAddr,
-		// NewClient:              ratelimiter.NewClientWithRateLimit,
-		LivenessEndpointName:  option.Opts.LivenessEndpointName,
-		ReadinessEndpointName: option.Opts.ReadinessEndpointName,
-		// EventBroadcaster:       ratelimiter.EventBroadcasterWithRateLimit(),
+		LivenessEndpointName:   option.Opts.LivenessEndpointName,
+		ReadinessEndpointName:  option.Opts.ReadinessEndpointName,
 	})
 	if err != nil {
 		return fmt.Errorf("unable to start controller manager: %s", err)

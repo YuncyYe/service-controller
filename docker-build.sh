@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# Copyright (c) 2025 - 2026 The BFE Authors.
+# Copyright (c) 2025 The BFE Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -59,5 +59,4 @@ echo "${GIT_COMMIT}-${FORMATTED_TS}" >> IMAGEBUILD
 
 docker build  --build-arg COMMIT_ID=${GIT_COMMIT} --build-arg VERSION=${VERSION} --build-arg FORMATTED_TS=${FORMATTED_TS} -t ghcr.io/bfenetworks/service-controller:$ftag .
 #docker push ghcr.io/bfenetworks/service-controller:$ftag
-
 

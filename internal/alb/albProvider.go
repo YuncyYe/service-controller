@@ -1,4 +1,4 @@
-// Copyright (c) 2025 - 2026 The BFE Authors.
+// Copyright (c) 2025 The BFE Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bfenetworks/k8s/service-controller/internal/alb/apis/product_pool"
-	"github.com/bfenetworks/k8s/service-controller/internal/option/externalLB"
-	util "github.com/bfenetworks/k8s/service-controller/internal/util"
+	"github.com/bfenetworks/service-controller/internal/alb/apis/product_pool"
+	"github.com/bfenetworks/service-controller/internal/option/externalLB"
+	util "github.com/bfenetworks/service-controller/internal/util"
 	v1 "k8s.io/api/core/v1"
 )
 

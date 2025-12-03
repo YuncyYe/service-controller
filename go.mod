@@ -1,4 +1,4 @@
-module github.com/bfenetworks/k8s/service-controller
+module github.com/bfenetworks/service-controller
 
 go 1.21
 
